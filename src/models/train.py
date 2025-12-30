@@ -15,7 +15,7 @@ Preprocess_DATAPATH = Path("data/processed/process_data.csv")
 
 
 def load_preprocess_data(path:Path=Preprocess_DATAPATH) -> pd.DataFrame:
-    if not path.exists:
+    if not path.exists():
         raise FileNotFoundError(f"Preprocessed Dataset not found at {path}")
     
     return pd.read_csv(path)
@@ -28,7 +28,7 @@ def train_model(df:pd.DataFrame):
 
     clf=RandomForestClassifier(
         n_estimators= 200 ,
-        class_weihgts= "balanced" ,     
+        class_weight= "balanced" ,     
         random_state= 42,
         n_jobs=-1
     )
@@ -47,7 +47,7 @@ def train_model(df:pd.DataFrame):
         print(f"Train Accuracy: {train_score:.4f}")
         print(f"Test Accuracy:  {test_score:.4f}")
 
-        MODEL_PATH.parent.makedir(parents=True, exist_ok=True)
+        MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(clf,MODEL_PATH)
 
         mlflow.sklearn.log_model(clf,"fraud_model")

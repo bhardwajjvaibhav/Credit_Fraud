@@ -5,18 +5,18 @@ import pandas as pd
 from sklearn.metrics import (confusion_matrix,classification_report,roc_auc_score)
 
 MODEL_PATH = Path("models/model.pkl")
-PROCESSED_DATA_PATH = Path("data/processed/processed_creditcard.csv")
+Preprocess_Datapath = Path("data/processed/preprocess_creditcard.csv")
 
 
-def load_data(path:Path=PROCESSED_DATA_PATH):
-    if not path.exist:
+def load_data(path:Path=Preprocess_Datapath):
+    if not path.exists():
         raise FileNotFoundError
     
     return pd.read_csv(path)
 
 
 def load_model(path:Path=MODEL_PATH):
-    if not path.exist:
+    if not path.exists():
         raise ModuleNotFoundError
     
     return joblib.load(MODEL_PATH)

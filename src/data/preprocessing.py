@@ -2,14 +2,12 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from pathlib import Path
 
-
-RAW_DATAPATH=Path("data/raw/creditcard.csv")
-Preprocess_DATAPATH=Path("data/processed/process_data.csv")
-
+RAW_DATAPATH = Path("data/raw/creditcard.csv")
+Preprocess_DATAPATH = Path("data/processed/processed_creditcard.csv")
 
 def load_data(path:Path=RAW_DATAPATH) -> pd.DataFrame :
 
-    if not path.exsist:
+    if not path.exists():
         raise FileNotFoundError(f"Dataset was not found at:{path}")
     
     return pd.read_csv(path)
@@ -21,9 +19,9 @@ def preprocess_data(df:pd.DataFrame) -> pd.DataFrame:
 
     scaler=StandardScaler()
 
-    df["norm_amount"] = scaler.fit_transform(df["Amount"]).values.reshape(-1,1)
+    df["norm_amount"] = scaler.fit_transform(df[["Amount"]])
 
-    df["norm_time"] = scaler.fit_transform(df["Time"]).values.reshape(-1,1)
+    df["norm_time"] = scaler.fit_transform(df[["Time"]])
 
     df=df.drop(columns=["Amount","Time"])
 
