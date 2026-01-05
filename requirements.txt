@@ -5,3 +5,5 @@ pathlib
 mlflow
 dvc
 scikit-learn
+fastapi
+uvicorn

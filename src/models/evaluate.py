@@ -1,47 +1,61 @@
-import joblib
-from pathlib import Path
+# src/models/evaluate.py
 
 import pandas as pd
-from sklearn.metrics import (confusion_matrix,classification_report,roc_auc_score)
+import mlflow
 
-MODEL_PATH = Path("models/model.pkl")
-Preprocess_Datapath = Path("data/processed/preprocess_creditcard.csv")
-
-
-def load_data(path:Path=Preprocess_Datapath):
-    if not path.exists():
-        raise FileNotFoundError
-    
-    return pd.read_csv(path)
+from sklearn.metrics import (
+    classification_report,
+    confusion_matrix,
+    roc_auc_score
+)
 
 
-def load_model(path:Path=MODEL_PATH):
-    if not path.exists():
-        raise ModuleNotFoundError
-    
-    return joblib.load(MODEL_PATH)
+# ------------------
+# CONFIG
+# ------------------
+MLFLOW_TRACKING_URI = "sqlite:///mlruns_db/mlflow.db"
 
 
-def evaluate():
+# ------------------
+# EVALUATION FUNCTION
+# ------------------
+def evaluate(
+    model,
+    X_test: pd.DataFrame,
+    y_test: pd.Series,
+    run_id: str
+) -> None:
+    """
+    Evaluate a trained model on test data and log metrics to MLflow.
 
-    print("EVALUATING MODEL........")
-    df=load_data()
-    model=load_model()
-    X_test = df.drop(columns=["Class"])
-    y_test = df["Class"]
+    Args:
+        model   : trained sklearn model
+        X_test  : test features
+        y_test  : test labels
+        run_id  : MLflow run ID (same run used during training)
+    """
 
-    print("🔍 Running evaluation...")
-    y_pred = model.predict(X_test)
-    y_prob = model.predict_proba(X_test)[:, 1]
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
-    print("\n===== Classification Report =====")
-    print(classification_report(y_test, y_pred))
+    print("📊 Evaluating model...")
 
-    print("\n===== Confusion Matrix =====")
-    print(confusion_matrix(y_test, y_pred))
+    # Attach to the same MLflow run
+    with mlflow.start_run(run_id=run_id):
 
-    auc_score = roc_auc_score(y_test, y_prob)
-    print(f"\nROC-AUC Score: {auc_score:.4f}")
+        # Predictions
+        y_pred = model.predict(X_test)
+        y_prob = model.predict_proba(X_test)[:, 1]
 
+        # Metrics
+        roc_auc = roc_auc_score(y_test, y_prob)
 
+        mlflow.log_metric("roc_auc", roc_auc)
 
+        # Console output
+        print("\n===== Classification Report =====")
+        print(classification_report(y_test, y_pred))
+
+        print("\n===== Confusion Matrix =====")
+        print(confusion_matrix(y_test, y_pred))
+
+        print(f"\n🔥 ROC-AUC Score: {roc_auc:.4f}")
